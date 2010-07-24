@@ -1,0 +1,12 @@
+{% load compress %}
+
+{% compress js %}
+<script type="text/javascript" src="{{ STATIC_URL }}jquery/jquery-1.4.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}jquery/jquery.qtip.js"></script>
+{% endcompress %}
+
+{% compress css %}
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}styles/reset.css" media="screen, projection" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}styles/style.css" media="screen, projection" />
+<link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}styles/style-green.css" media="screen, projection" />
+{% endcompress %}

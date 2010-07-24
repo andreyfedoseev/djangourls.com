@@ -1,0 +1,21 @@
+{% load i18n %}
+<ul>
+  {% for item in items %}
+    <li>
+      <span class="mentions"><span title="{{ item.num_mentions }} {% trans "mentions" %}">{{ item.num_mentions }}</span></span>
+      <div class="ct"{% if item.description %} title="{{ item.description|striptags|truncatewords:50 }}"{% endif %}>
+      <a href="{{ item.get_absolute_url }}">{{ item.title|striptags|escape|safe }}</a>
+      </div>
+    </li>
+  {% if forloop.counter == 7 %}
+</ul>
+<ul class="more-items">
+  {% endif %}
+  {% endfor %}
+</ul>
+{% if items.count > 7%}
+<div class="foot">
+  <a class="more" href="#">{% trans "More&hellip;" %}</a>
+  <a class="less" href="#">{% trans "Less&hellip;" %}</a>
+</div>
+{% endif %}

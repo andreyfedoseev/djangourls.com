@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load compress %}
+
+{% block content %}
+<div class="column">
+  <div class="box">
+    <h3>{% trans "Trends" %}</h3>
+    {% with trends as items %}
+      {% include "include/trends.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="column">
+  <div class="box">
+    <h3>{% trans "Community" %}</h3>
+    {% with community as items %}
+      {% include "include/links.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="column last">
+  <div class="box">
+    <h3>{% trans "Snippets" %}</h3>
+    {% with snippets as items %}
+      {% include "include/links.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="clear"></div>
+
+<div class="column">
+  <div class="box">
+    <h3>{% trans "Questions" %}</h3>
+    {% with questions as items %}
+      {% include "include/links.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="column">
+  <div class="box">
+    <h3>{% trans "Jobs" %}</h3>
+    {% with jobs as items %}
+      {% include "include/links.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="column last">
+  <div class="box">
+    <h3>{% trans "Books" %}</h3>
+    {% with books as items %}
+      {% include "include/books.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+
+<div class="clear"></div>
+
+<div class="column">
+  <div class="box">
+    <h3>{% trans "Packages" %}</h3>
+    {% with packages as items %}
+      {% include "include/links.html" %}
+    {% endwith %}
+  </div>
+</div>
+
+<div class="clear"></div>
+
+{% compress js %}
+<script type="text/javascript">
+  $(function() {
+    var settings = {
+          style: { 
+            name: 'dark',
+            tip: true,
+            border: {
+              radius: 5
+            },
+            width: 300
+          },
+          position: {
+            corner: {
+              target: 'rightMiddle',
+              tooltip: 'leftMiddle'
+            }
+          }
+        };
+    $('.column:not(.last) .box li div[title]').qtip(settings);
+    settings.position.corner.target = "leftMiddle";
+    settings.position.corner.tooltip = "rightMiddle";
+    $('.column.last .box li div[title]').qtip(settings);
+
+    $("a.more").click(function() {
+      $(this).parents(".box").find("ul.more-items").show();
+      $(this).siblings("a.less").show();
+      $(this).hide();
+      return false;
+    });
+     
+    $("a.less").click(function() {
+        $(this).parents(".box").find("ul.more-items").hide();
+        $(this).siblings("a.more").show();
+        $(this).hide();
+        return false;
+      }); 
+  });
+</script>
+{% endcompress %}
+
+{% endblock %}

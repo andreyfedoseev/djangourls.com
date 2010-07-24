@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load i18n %}
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>{% block title %}{% trans "djangourls - hot links from Django universe" %}{% endblock %}</title>
+    <meta name="description" content="{% trans "djangourls.com is an aggregator for the newest and most popular Django links" %}" />
+    <base href="{{ BASE_URL }}" />
+    <link rel="canonical" href="/" />
+    {% comment %}<link rel="icon" href="{{ STATIC_URL }}images/favicon.ico"/>{% endcomment %}
+    {% include "include/resources.html" %}
+    {% include "include/google-analytics.html" %}
+  </head>
+  <body>
+    {% include "include/header.html" %}
+    <div class="container">
+      {% block content %}
+      {% endblock %}
+    </div>
+    {% block footer %}
+    <div class="container footer">
+      <div class="addthis">
+        <a class="addthis_button" href="http://www.addthis.com/bookmark.php?v=250&amp;username=djangourls"><img src="http://s7.addthis.com/static/btn/v2/lg-share-en.gif" width="125" height="16" alt="Bookmark and Share" style="border:0"/></a><script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#username=djangourls"></script>
+      </div>
+      <div class="tweetmeme">
+        <script type="text/javascript">
+        tweetmeme_style = 'compact';
+        </script>
+        <script type="text/javascript" src="http://tweetmeme.com/i/scripts/button.js"></script>
+      </div>
+      <a href="{% url feedback %}">{% trans "Feedback" %}</a><span class="separator"></span>{% trans "Powered by" %} <a href="http://www.djangoproject.com/">Django</a>
+      
+    </div>
+    {% endblock %}
+  </body>
+</html>

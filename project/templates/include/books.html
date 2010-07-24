@@ -1,0 +1,23 @@
+{% load i18n %}
+<ul>
+  {% for item in items %}
+    <li>
+      <div class="ct"{% if item.description %} title="{{ item.description|striptags|truncatewords:50 }}"{% endif %}>
+      <a class="cover" href="{{ item.url }}"><img src="{{ item.small_image_url }}" alt="{{ item.description|striptags|truncatewords:50 }}" /></a>
+      <a href="{{ item.url }}">{{ item.title|striptags|escape|safe|truncatewords:15 }}</a>
+      <div class="author">{% trans "Author:" %} {{ item.author }}</div>
+      <div class="clear"></div>
+      </div>
+    </li>
+  {% if forloop.counter == 3 %}
+</ul>
+<ul class="more-items">
+  {% endif %}
+  {% endfor %}
+</ul>
+{% if items.count > 3 %}
+<div class="foot">
+  <a class="more" href="#">{% trans "More&hellip;" %}</a>
+  <a class="less" href="#">{% trans "Less&hellip;" %}</a>
+</div>
+{% endif %}
