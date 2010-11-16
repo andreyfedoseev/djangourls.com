@@ -40,10 +40,11 @@ def get_book_data(item):
     data['url'] = urllib.unquote(unicode(item.DetailPageURL))
     data['title'] = unicode(item.ItemAttributes.Title)
     data['description'] = u''
-    for r in item.EditorialReviews.EditorialReview:
-        if r.Source == 'Product Description':
-            data['description'] = unicode(r.Content)
-            break
+    if hasattr(item, "EditorialReviews"):
+        for r in item.EditorialReviews.EditorialReview:
+            if r.Source == 'Product Description':
+                data['description'] = unicode(r.Content)
+                break
     data['author'] = unicode(getattr(item.ItemAttributes, "Author", u''))
     data['small_image_url'] = unicode(item.SmallImage.URL)  
     data['medium_image_url'] = unicode(item.MediumImage.URL)  
