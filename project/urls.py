@@ -9,7 +9,7 @@ admin.autodiscover()
 
 
 urlpatterns = patterns('',
-    url(r'^admin/(.*)', admin.site.root),
+    url(r'^admin/(.*)', include(admin.site.urls)),
     url(r'^$', 'project.views.index'),
     url(r'^feedback$', direct_to_template, {'template':'feedback.html'}, name='feedback'),
 )
