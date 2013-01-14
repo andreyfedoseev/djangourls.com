@@ -60,7 +60,6 @@ INSTALLED_APPS = (
     'django.contrib.syndication',
     'django_extensions',
     'south',
-    'djangodblog',
     'staticfiles',
     'compressor',
     'robots',
