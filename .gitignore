@@ -21,3 +21,4 @@ project/media/admin/
 project/media/debug_toolbar/
 project/production.py
 project/development.py
+/.idea/
