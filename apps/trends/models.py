@@ -12,7 +12,7 @@ import urllib2
 
 
 class TrendItemManager(models.Manager):
-    
+
     def published(self):
         qs = super(TrendItemManager, self).get_query_set()
         qs = qs.filter(broken=False, published=True).order_by("-timestamp")
@@ -21,13 +21,13 @@ class TrendItemManager(models.Manager):
 
 
 class TrendItem(URL):
-    
+
     broken = models.BooleanField(default=False)
     published = models.BooleanField(default=False)
     objects = TrendItemManager()
-    
+
     def _fetch(self):
-        
+
         # Try to fetch title from original URL
         try:
             response = urllib2.urlopen(self.url)
@@ -57,7 +57,7 @@ class TrendItem(URL):
                 return
         except urllib2.URLError:
             pass
-        
+
         self.title = title
         meta_description = soup.find("meta", attrs={"name": "description"})
         if meta_description:
@@ -71,24 +71,24 @@ class TrendItem(URL):
 
 
 class TwitterSearch(models.Model):
-    
+
     term = models.CharField(max_length=100)
     last_tweet_id = models.BigIntegerField(null=True, blank=True)
     bad_words = models.CharField(max_length=500, null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.term
-    
+
     class Meta:
         verbose_name = _("Twitter search")
         verbose_name_plural = _("Twitter searches")
-    
-    
+
+
 class DeliciousSearch(models.Model):
-    
+
     tag = models.CharField(max_length=50)
     last_fetched = models.DateTimeField(null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.tag
 
@@ -98,10 +98,10 @@ class DeliciousSearch(models.Model):
 
 
 class DiigoSearch(models.Model):
-    
+
     tag = models.CharField(max_length=50)
     last_fetched = models.DateTimeField(null=True, blank=True)
-    
+
     def __unicode__(self):
         return self.tag
 
@@ -111,13 +111,13 @@ class DiigoSearch(models.Model):
 
 
 class Mention(models.Model):
-    
+
     trend = models.ForeignKey(TrendItem)
     timestamp = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ("-timestamp",)
-        
+
     def save(self, *args, **kwargs):
         super(Mention, self).save(*args, **kwargs)
         if not self.trend.published and self.trend.mention_set.count() >= MIN_MENTIONS_TO_PUBLISH:
@@ -129,17 +129,16 @@ class Mention(models.Model):
 
 
 class TwitterMention(Mention):
-    
+
     tweet_id = models.BigIntegerField()
 
 
 class DeliciousMention(Mention):
-    
+
     username = models.CharField(max_length=50)
 
 
 class DiigoMention(Mention):
-    
+
     username = models.CharField(max_length=50)
 
-        

@@ -8,10 +8,8 @@ COMMUNITY_CATEGORY = 'community'
 
 
 FEED_CATEGORIES = (
-  (QUESTION_CATEGORY, _("Question")),                   
-  (SNIPPET_CATEGORY, _("Snippet")),                   
-  (JOB_CATEGORY, _("Jobs")),                   
-  (COMMUNITY_CATEGORY, _("Community")),                   
+  (QUESTION_CATEGORY, _("Question")),
+  (SNIPPET_CATEGORY, _("Snippet")),
+  (JOB_CATEGORY, _("Jobs")),
+  (COMMUNITY_CATEGORY, _("Community")),
 )
-
-
