@@ -58,7 +58,6 @@ INSTALLED_APPS = (
     'compressor',
     'robots',
     'debug_toolbar',
-    'johnny',
     'feeds',
     'trends',
     'packages',
@@ -86,5 +85,9 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 
 SITE_ID = 1
 
-CACHE_BACKEND = 'johnny.backends.memcached://localhost:11211'
-JOHNNY_MIDDLEWARE_KEY_PREFIX='jc_djangourls.com'
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
