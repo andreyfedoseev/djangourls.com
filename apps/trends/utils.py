@@ -9,7 +9,17 @@ _marker = object()
 
 
 URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
-CLEANED_QUERY_PARAMS = ('utm_source', 'utm_medium')
+CLEANED_QUERY_PARAMS = ('utm_source', 'utm_medium', 'utm_hp_ref')
+BLACKLIST_URLS = (
+    re.compile("^http://instagr.am/"),
+    re.compile("^http://instagram.com/"),
+    re.compile("^http://yfrog.com/"),
+    re.compile("^http[s]?://foursquare.com/"),
+    re.compile("^http[s]?://www.facebook.com/photo.php"),
+    re.compile("^http[s]?://twitter.com/\w+/status/"),
+    re.compile("^http://tmi.me/"),
+    re.compile("^http://ask.fm/"),
+)
 
 
 def get_tiny_url_re():
@@ -51,9 +61,13 @@ def untiny_url(url):
 
     if response:
         response = response.text
+
         try:
             if re.match(URL_RE, response) and not url.startswith(response):
                 result = response
+                tiny_urls_re = get_tiny_url_re()
+                if tiny_urls_re and re.match(tiny_urls_re, result):
+                    result = untiny_url(result)
             else:
                 result = None
         except UnicodeDecodeError:
@@ -92,8 +106,23 @@ def find_urls(text):
     for url in re.findall(URL_RE, text):
         if tiny_urls_re and re.match(tiny_urls_re, url):
             url = untiny_url(url)
-        if url:
-            urls.add(clean_url(url))
+        if not url:
+            continue
+
+        url = clean_url(url)
+        try:
+            url = requests.get(url).url
+        except requests.RequestException:
+            continue
+
+        blacklisted = False
+        for blacklist_re in BLACKLIST_URLS:
+            if blacklist_re.match(url):
+                blacklisted = True
+                break
+
+        if not blacklisted:
+            urls.add(url)
 
     return urls
 
