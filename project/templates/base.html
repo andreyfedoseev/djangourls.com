@@ -6,7 +6,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>{% block title %}{% trans "djangourls - hot links from Django universe" %}{% endblock %}</title>
     <meta name="description" content="{% trans "djangourls.com is an aggregator for the newest and most popular Django links" %}" />
-    <base href="{{ BASE_URL }}" />
     <link rel="canonical" href="/" />
     {% comment %}<link rel="icon" href="{{ STATIC_URL }}images/favicon.ico"/>{% endcomment %}
     {% include "include/resources.html" %}
@@ -30,7 +29,7 @@
         <script type="text/javascript" src="http://tweetmeme.com/i/scripts/button.js"></script>
       </div>
       <a href="{% url feedback %}">{% trans "Feedback" %}</a><span class="separator"></span>{% trans "Powered by" %} <a href="http://www.djangoproject.com/">Django</a>
-      
+
     </div>
     {% endblock %}
   </body>

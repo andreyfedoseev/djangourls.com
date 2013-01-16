@@ -1,8 +1,8 @@
 from django.core.cache import cache
 import re
 import urllib
-import urllib2
 import urlparse
+import requests
 
 
 _marker = object()
@@ -12,24 +12,27 @@ URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-
 CLEANED_QUERY_PARAMS = ('utm_source', 'utm_medium')
 
 
-
 def get_tiny_url_re():
     cache_key = "get_tiny_url_re"
     result = cache.get(cache_key, _marker)
     if result != _marker:
         return result
     try:
-        response = urllib2.urlopen("http://untiny.me/api/1.0/services/?format=text")
-    except urllib2.URLError:
+        response = requests.get(
+            "http://untiny.me/api/1.0/services/?format=text"
+        )
+    except requests.RequestException:
         response = None
-        
+
     if response:
-        services = [s.strip() for s in response.read().split(',')]
-        result = re.compile(r'|'.join(r'^http://%s' % service for service in services))
+        services = [s.strip() for s in response.text.split(',')]
+        result = re.compile(
+            r'|'.join(r'^http://%s' % service for service in services)
+        )
     else:
         result = None
-    cache.set(cache_key, result, 60 * 60 * 24) 
-    return result 
+    cache.set(cache_key, result, 60 * 60 * 24)
+    return result
 
 
 def untiny_url(url):
@@ -38,13 +41,16 @@ def untiny_url(url):
     if result != _marker:
         return result
     try:
-        response = urllib2.urlopen("http://untiny.me/api/1.0/extract/?format=text&url=%s" % urllib2.quote(url))
-    except urllib2.URLError:
-            response = None
-        
+        response = requests.get(
+            "http://untiny.me/api/1.0/extract/?format=text&url={0}".format(
+                urllib.quote(url)
+            )
+        )
+    except requests.RequestException:
+        response = None
+
     if response:
-        response = response.read()
-        response = response.decode('utf-8')
+        response = response.text
         try:
             if re.match(URL_RE, response) and not url.startswith(response):
                 result = response
@@ -54,10 +60,10 @@ def untiny_url(url):
             result = None
     else:
         result = None
-    cache.set(cache_key, result, 60 * 60 * 24) 
-    return result 
+    cache.set(cache_key, result, 60 * 60 * 24)
+    return result
 
- 
+
 def clean_url(url):
     try:
         str(url)
@@ -67,20 +73,22 @@ def clean_url(url):
     if not parts[3]:
         return url
     query = urlparse.parse_qsl(parts[3])
-    query = [(param, value) for param, value in query if param not in CLEANED_QUERY_PARAMS]
+    query = [
+        (param, value) for param, value in query
+        if param not in CLEANED_QUERY_PARAMS
+    ]
     if query:
         parts[3] = urllib.urlencode(query)
     else:
         parts[3] = ''
     return urlparse.urlunsplit(parts)
-    
 
 
 def find_urls(text):
     urls = set()
-    
-    tiny_urls_re = get_tiny_url_re()  
-    
+
+    tiny_urls_re = get_tiny_url_re()
+
     for url in re.findall(URL_RE, text):
         if tiny_urls_re and re.match(tiny_urls_re, url):
             url = untiny_url(url)
@@ -88,5 +96,4 @@ def find_urls(text):
             urls.add(clean_url(url))
 
     return urls
-    
-    
+

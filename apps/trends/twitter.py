@@ -4,8 +4,8 @@ from trends.settings import TWITTER_MENTION_LIFETIME
 from trends.utils import find_urls
 import json
 import datetime
+import requests
 import urllib
-import urllib2
 
 
 def fetch_twitter():
@@ -24,11 +24,15 @@ def fetch_twitter():
             query['since_id'] = str(search.last_tweet_id)
 
         try:
-            response = urllib2.urlopen("http://search.twitter.com/search.json?%s" % urllib.urlencode(query))
-        except urllib2.URLError:
+            response = requests.get(
+                "http://search.twitter.com/search.json?{0}".format(
+                    urllib.urlencode(query)
+                )
+            )
+        except requests.RequestException:
             continue
 
-        response = json.loads(response.read())
+        response = json.loads(response.text)
 
         items = response['results']
 
@@ -43,7 +47,10 @@ def fetch_twitter():
             for url in find_urls(text):
                 try:
                     # This twitter mention was fetched already, skip this URL
-                    TwitterMention.objects.get(trend__url=url, tweet_id=tweet_id)
+                    TwitterMention.objects.get(
+                        trend__url=url,
+                        tweet_id=tweet_id
+                    )
                     continue
                 except TwitterMention.DoesNotExist:
                     pass
@@ -75,7 +82,9 @@ def fetch_twitter():
             search.save()
 
     # Remove old twitter mentions
-    old_mentions = TwitterMention.objects.filter(timestamp__lt=(datetime.datetime.now() - TWITTER_MENTION_LIFETIME))
+    old_mentions = TwitterMention.objects.filter(
+        timestamp__lt=(datetime.datetime.now() - TWITTER_MENTION_LIFETIME)
+    )
     old_mentions.delete()
 
     return cnt

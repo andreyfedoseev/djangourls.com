@@ -1,7 +1,7 @@
 from packages.models import PyPiPackage
 import BeautifulSoup
 import re
-import urllib2
+import requests
 
 
 PYPI_URL = "http://pypi.python.org/pypi?:action=browse&show=all&c=523"
@@ -9,23 +9,24 @@ PYPY_BASE_URL = "http://pypi.python.org"
 
 
 def harvest_pypi_packages():
-    
+
     cnt = 0
-    
+
     try:
-        response = urllib2.urlopen(PYPI_URL)
-    except urllib2.URLError:
+        response = requests.get(PYPI_URL)
+    except requests.RequestException:
         return
-    
-    soup = BeautifulSoup.BeautifulSoup(response.read())
-    list = soup.find("table", attrs={"class":"list"})
+
+    soup = BeautifulSoup.BeautifulSoup(response.text)
+    list = soup.find("table", attrs={"class": "list"})
     if not list:
         return
-    for row in list.findAll("tr", attrs={"class":re.compile("(odd)|(even)")}):
+    for row in list.findAll("tr", attrs={"class": re.compile("(odd)|(even)")}):
         cells = row.findAll("td")
-        data = {}
-        data["name"] = cells[0].find("a").renderContents()
-        data["url"] =  cells[0].find("a")["href"]
+        data = dict(
+            name=cells[0].find("a").renderContents(),
+            url=cells[0].find("a")["href"],
+        )
         if not data["url"].startswith(PYPY_BASE_URL):
             data["url"] = PYPY_BASE_URL + data["url"]
         data["version"] = data["url"].split("/")[-1]
@@ -40,10 +41,8 @@ def harvest_pypi_packages():
                 cnt += 1
         except PyPiPackage.DoesNotExist:
             package = PyPiPackage(**data)
-            package.save() 
+            package.save()
             cnt += 1
-            
+
     return cnt
-             
-        
-    
+

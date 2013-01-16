@@ -3,12 +3,12 @@ from django.db import models
 from django.db.models.aggregates import Count
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext_lazy as _
+import requests
 from trends.settings import MIN_MENTIONS_TO_PUBLISH
 import BeautifulSoup
-import cjson
 import datetime
+import json
 import urllib
-import urllib2
 
 
 class TrendItemManager(models.Manager):
@@ -30,15 +30,15 @@ class TrendItem(URL):
 
         # Try to fetch title from original URL
         try:
-            response = urllib2.urlopen(self.url)
-        except (urllib2.URLError, ValueError):
+            response = requests.get(self.url)
+        except requests.RequestException:
             self.broken = True
             return
         if not response:
             self.broken = True
             return
         try:
-            soup = BeautifulSoup.BeautifulSoup(response.read())
+            soup = BeautifulSoup.BeautifulSoup(response.text)
         except:
             self.broken = True
             return
@@ -50,12 +50,18 @@ class TrendItem(URL):
         title = title.renderContents()
 
         try:
-            detect_lang_response = urllib2.urlopen("http://ajax.googleapis.com/ajax/services/language/detect?v=1.0&q=%s" % urllib.quote(title))
-            detect_lang_result = cjson.decode(detect_lang_response.read())
-            if detect_lang_result["responseData"]["isReliable"] and not detect_lang_result["responseData"]["language"].startswith("en"):
+            detect_lang_response = requests.get(
+                "http://ajax.googleapis.com/ajax/services/language/detect?v=1.0&q={0}".format(
+                    urllib.quote(title)
+                )
+            )
+            detect_lang_result = json.loads(detect_lang_response.text)
+            if detect_lang_result["responseData"] and \
+               detect_lang_result["responseData"]["isReliable"] and \
+               not detect_lang_result["responseData"]["language"].startswith("en"):
                 self.broken = True
                 return
-        except urllib2.URLError:
+        except requests.RequestException:
             pass
 
         self.title = title
@@ -84,32 +90,6 @@ class TwitterSearch(models.Model):
         verbose_name_plural = _("Twitter searches")
 
 
-class DeliciousSearch(models.Model):
-
-    tag = models.CharField(max_length=50)
-    last_fetched = models.DateTimeField(null=True, blank=True)
-
-    def __unicode__(self):
-        return self.tag
-
-    class Meta:
-        verbose_name = _("Delicious search")
-        verbose_name_plural = _("Delicious searches")
-
-
-class DiigoSearch(models.Model):
-
-    tag = models.CharField(max_length=50)
-    last_fetched = models.DateTimeField(null=True, blank=True)
-
-    def __unicode__(self):
-        return self.tag
-
-    class Meta:
-        verbose_name = _("Diigo search")
-        verbose_name_plural = _("Diigo searches")
-
-
 class Mention(models.Model):
 
     trend = models.ForeignKey(TrendItem)
@@ -131,14 +111,3 @@ class Mention(models.Model):
 class TwitterMention(Mention):
 
     tweet_id = models.BigIntegerField()
-
-
-class DeliciousMention(Mention):
-
-    username = models.CharField(max_length=50)
-
-
-class DiigoMention(Mention):
-
-    username = models.CharField(max_length=50)
-

@@ -1,4 +1,6 @@
 import os
+from django.conf.global_settings import LOGGING
+
 
 DATABASES = {
     'default': {
@@ -37,7 +39,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-#     'debug_toolbar.middleware.DebugToolbarMiddleware',
+#    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'project.urls'
@@ -90,4 +92,15 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': '127.0.0.1:11211',
     }
+}
+
+LOGGING["handlers"]["console"] = {
+    'level': 'DEBUG',
+    'class': 'logging.StreamHandler',
+}
+
+LOGGING["loggers"]["djangourls.harvest"] = {
+    'handlers': ['mail_admins'],
+    'level': 'ERROR',
+    'propagate': True,
 }
