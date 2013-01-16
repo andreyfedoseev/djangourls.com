@@ -1,6 +1,7 @@
 from django.contrib import admin
 from trends.models import TwitterSearch, TrendItem
 from django.contrib.admin.options import ModelAdmin
+from trends.models.trend import BlacklistWord
 
 
 class TrendItemAdmin(ModelAdmin):
@@ -17,3 +18,6 @@ class TwitterSearchAdmin(ModelAdmin):
 
 
 admin.site.register(TwitterSearch, TwitterSearchAdmin)
+
+
+admin.site.register(BlacklistWord, ModelAdmin)

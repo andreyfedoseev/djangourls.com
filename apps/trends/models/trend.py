@@ -1,15 +1,15 @@
 from core.models import URL
+from django.conf import settings
 from django.db import models
-from django.utils.html import strip_tags
 from guess_language import guessLanguage
-import BeautifulSoup
 import datetime
+import json
 import requests
 
 
 class TrendItemManager(models.Manager):
 
-    MIN_MENTIONS_TO_DISPLAY = 2
+    MIN_MENTIONS_TO_DISPLAY = 3
     MENTION_LIFETIME = datetime.timedelta(days=7)
 
     def actual(self):
@@ -43,48 +43,45 @@ class TrendItem(URL):
     def fetch(cls):
 
         cnt = 0
+
+        blacklist_words = [
+            w.lower() for w in BlacklistWord.objects.values_list("word", flat=True)
+        ]
+
         for item in TrendItem.objects.to_fetch():
             cnt += 1
             item.displayed = False
 
-            # Try to fetch title from original URL
-            try:
-                response = requests.get(item.url)
-            except requests.RequestException:
+            response = requests.get(
+                "http://www.diffbot.com/api/article",
+                params=dict(
+                    token=settings.DIFFBOT_TOKEN,
+                    url=item.url,
+                    summary=""
+                )
+            )
+
+            response = json.loads(response.text)
+
+            if response["title"]:
+                item.title = response["title"]
+            item.summary = response["summary"]
+
+            text = u" ".join((item.title, item.summary))
+            text_lower = text.lower()
+            blacklisted = False
+
+            for word in blacklist_words:
+                if word in text_lower:
+                    blacklisted = True
+
+            if blacklisted:
                 item.save()
                 continue
 
-            try:
-                soup = BeautifulSoup.BeautifulSoup(response.text)
-            except:
+            if not guessLanguage(text).startswith("en"):
                 item.save()
                 continue
-
-            title = soup.find("title")
-            if not title:
-                item.save()
-                continue
-
-            title = title.renderContents().strip()
-
-            if not title:
-                item.save()
-                continue
-
-            if not guessLanguage(title).startswith("en"):
-                item.save()
-                continue
-
-            item.title = title
-            meta_description = soup.find("meta", attrs={"name": "description"})
-            if meta_description:
-                item.description = meta_description["content"]
-            else:
-                for para in soup.findAll("p"):
-                    para_contents = para.renderContents()
-                    if len(strip_tags(para_contents)) > 100:
-                        item.description = para_contents
-                        break
 
             item.displayed = True
             item.save()
@@ -102,5 +99,12 @@ class Mention(models.Model):
         ordering = ("-timestamp",)
 
 
+class BlacklistWord(models.Model):
 
+    word = models.CharField(max_length=100)
 
+    def __unicode__(self):
+        return self.word
+
+    class Meta:
+        app_label = "trends"

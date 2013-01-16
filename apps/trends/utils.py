@@ -11,14 +11,14 @@ _marker = object()
 URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
 CLEANED_QUERY_PARAMS = ('utm_source', 'utm_medium', 'utm_hp_ref')
 BLACKLIST_URLS = (
-    re.compile("^http://instagr.am/"),
-    re.compile("^http://instagram.com/"),
+    re.compile("^http://instagr\.am/"),
+    re.compile("^http://instagram\.com/"),
     re.compile("^http://yfrog.com/"),
-    re.compile("^http[s]?://foursquare.com/"),
-    re.compile("^http[s]?://www.facebook.com/photo.php"),
-    re.compile("^http[s]?://twitter.com/\w+/status/"),
-    re.compile("^http://tmi.me/"),
-    re.compile("^http://ask.fm/"),
+    re.compile("^http[s]?://foursquare\.com/"),
+    re.compile("^http[s]?://www\.facebook\.com/photo\.php"),
+    re.compile("^http[s]?://twitter\.com/\w+/status/"),
+    re.compile("^http://(m\.)?tmi\.me/"),
+    re.compile("^http://ask\.fm/"),
 )
 
 
