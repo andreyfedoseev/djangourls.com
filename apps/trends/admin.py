@@ -14,6 +14,10 @@ class TrendItemAdmin(ModelAdmin):
         queryset.update(displayed=False)
     make_not_displayed.short_description = "Mark as not displayed"
 
+    def re_fetch(self, request, queryset):
+        TrendItem.fetch(queryset)
+    re_fetch.short_description = "Re-fetch selected items"
+
 
 admin.site.register(TrendItem, TrendItemAdmin)
 

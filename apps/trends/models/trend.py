@@ -40,7 +40,10 @@ class TrendItem(URL):
         app_label = "trends"
 
     @classmethod
-    def fetch(cls):
+    def fetch(cls, queryset=None):
+
+        if queryset is None:
+            queryset = TrendItem.objects.to_fetch()
 
         cnt = 0
 
@@ -48,7 +51,7 @@ class TrendItem(URL):
             w.lower() for w in BlacklistWord.objects.values_list("word", flat=True)
         ]
 
-        for item in TrendItem.objects.to_fetch():
+        for item in queryset:
             cnt += 1
             item.displayed = False
 
