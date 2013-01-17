@@ -56,6 +56,7 @@ INSTALLED_APPS = (
     'django.contrib.syndication',
     'django.contrib.staticfiles',
     'django_extensions',
+    'gunicorn',
     'south',
     'compressor',
     'robots',
