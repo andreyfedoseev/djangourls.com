@@ -8,7 +8,7 @@ class TrendItemAdmin(ModelAdmin):
 
     list_display = ["title", "url", "displayed"]
     list_filter = ["displayed"]
-    actions = ["make_not_displayed"]
+    actions = ["make_not_displayed", "re_fetch"]
 
     def make_not_displayed(self, request, queryset):
         queryset.update(displayed=False)
