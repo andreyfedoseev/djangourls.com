@@ -69,7 +69,7 @@ class TrendItem(URL):
             item.title = response.get("title", item.title) or item.title
             item.description = response.get("summary", u"")
 
-            text = u" ".join((item.title, item.summary))
+            text = u" ".join((item.title, item.description))
             text_lower = text.lower()
             blacklisted = False
 
