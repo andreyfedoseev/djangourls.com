@@ -18,7 +18,9 @@ BLACKLIST_URLS = (
     re.compile("^http[s]?://www\.facebook\.com/photo\.php"),
     re.compile("^http[s]?://twitter\.com/\w+/status/"),
     re.compile("^http://(m\.)?tmi\.me/"),
-    re.compile("^http://ask\.fm/"),
+    re.compile("^http://imgur\.com/"),
+    re.compile("^http://m\.facebook\.com/"),
+    re.compile("^http://twitter\.yfrog\.com/"),
 )
 
 
