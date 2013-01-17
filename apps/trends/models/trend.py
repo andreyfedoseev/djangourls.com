@@ -67,7 +67,7 @@ class TrendItem(URL):
             response = json.loads(response.text)
 
             item.title = response.get("title", item.title) or item.title
-            item.summary = response.get("summary", u"")
+            item.description = response.get("summary", u"")
 
             text = u" ".join((item.title, item.summary))
             text_lower = text.lower()
