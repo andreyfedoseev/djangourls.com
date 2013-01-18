@@ -16,7 +16,7 @@ CONFIG = {
 
 env.roledefs = {
     "production": [
-        "djangourls.com",
+        "do01.andreyfedoseev.name",
     ],
 }
 
