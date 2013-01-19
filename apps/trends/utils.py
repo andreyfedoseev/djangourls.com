@@ -15,12 +15,14 @@ BLACKLIST_URLS = (
     re.compile("^http://instagram\.com/"),
     re.compile("^http://yfrog.com/"),
     re.compile("^http[s]?://foursquare\.com/"),
-    re.compile("^http[s]?://www\.facebook\.com/photo\.php"),
+    re.compile("^http[s]?://(www|m)\.facebook\.com/"),
     re.compile("^http[s]?://twitter\.com/\w+/status/"),
     re.compile("^http://(m\.)?tmi\.me/"),
     re.compile("^http://imgur\.com/"),
-    re.compile("^http://m\.facebook\.com/"),
     re.compile("^http://twitter\.yfrog\.com/"),
+    re.compile("^http://twitpic\.com/"),
+    re.compile("^http://pics\.lockerz\.com/"),
+    re.compile("^http://adf\.ly/"),
 )
 
 
