@@ -53,6 +53,8 @@ class Untiny(object):
         """
         if not self.is_tiny(url):
             return url
+        # The actual extraction is done in utility method so that
+        # result is cached only if is_tiny() check has passed.
         return self._do_extract(url)
 
 
