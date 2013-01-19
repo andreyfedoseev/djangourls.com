@@ -9,7 +9,6 @@ _marker = object()
 
 
 URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
-CLEANED_QUERY_PARAMS = ('utm_source', 'utm_medium', 'utm_hp_ref')
 BLACKLIST_URLS = (
     re.compile("^http://instagr\.am/"),
     re.compile("^http://instagram\.com/"),
@@ -83,6 +82,12 @@ def untiny_url(url):
 
 
 def clean_url(url):
+    """
+    Remove superfluous parameters from query string. At the moment all
+    parameters starting with `utm_` are removed.
+    :param url: URL to be cleaned
+    :return: cleaned URL
+    """
     try:
         str(url)
     except UnicodeEncodeError:
@@ -92,8 +97,9 @@ def clean_url(url):
         return url
     query = urlparse.parse_qsl(parts[3])
     query = [
-        (param, value) for param, value in query
-        if param not in CLEANED_QUERY_PARAMS
+        (param, value)
+        for param, value in query
+        if not param.startswith("utm_")
     ]
     if query:
         parts[3] = urllib.urlencode(query)
