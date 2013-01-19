@@ -55,10 +55,7 @@ class UntinyTestCase(unittest.TestCase):
                 "http://foo.com",
             )
             self.assertEquals(mock_get.call_count, 1)
-            self.assertTrue(mock_response_text.called)
-
-            mock_get.reset_mock()
-            mock_response_text.reset_mock()
+            self.assertEquals(mock_response_text.call_count, 1)
 
             # Check with another URL
             mock_response_text.return_value = "http://bar.com"
@@ -66,11 +63,8 @@ class UntinyTestCase(unittest.TestCase):
                 untiny.extract("http://1u.ro/123"),
                 "http://bar.com",
             )
-            self.assertEquals(mock_get.call_count, 1)
-            self.assertTrue(mock_response_text.called)
-
-            mock_get.reset_mock()
-            mock_response_text.reset_mock()
+            self.assertEquals(mock_get.call_count, 2)
+            self.assertEquals(mock_response_text.call_count, 2)
 
             # If the URL is not tiny return it unchanged.
             untiny.is_tiny.return_value = False
@@ -78,7 +72,7 @@ class UntinyTestCase(unittest.TestCase):
                 untiny.extract("http://example.com"),
                 "http://example.com",
             )
-            self.assertFalse(mock_get.called)
+            self.assertEquals(mock_get.call_count, 2)
 
         with patch("requests.get", MagicMock(side_effect=requests.RequestException)) as mock_get:
             # If a request to untiny.me fails return the original URL.
