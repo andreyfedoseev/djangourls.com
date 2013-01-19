@@ -109,7 +109,7 @@ class URLFinder(object):
         """
         return urlparse.urlsplit(url).netloc in URLFinder.BLACKLIST_DOMAINS
 
-    def get_final_url(self, url):
+    def follow_redirects(self, url):
         """
         Follow all redirects from given URL. Return None if the final URL
         can't be accessed.
@@ -125,7 +125,7 @@ class URLFinder(object):
         for url in re.findall(self.URL_RE, text):
             url = self.untiny.extract(url)
             url = self.clean_params(url)
-            url = self.get_final_url(url)
+            url = self.follow_redirects(url)
 
             if not self.is_blacklisted(url):
                 urls.add(url)

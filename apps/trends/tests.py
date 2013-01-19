@@ -96,7 +96,7 @@ class URLFinderTestCase(unittest.TestCase):
         finder = URLFinder()
         finder.untiny.extract = MagicMock(side_effect=lambda x: x)
         finder.clean_params = MagicMock(side_effect=lambda x: x)
-        finder.get_final_url = MagicMock(side_effect=lambda x: x)
+        finder.follow_redirects = MagicMock(side_effect=lambda x: x)
         finder.is_blacklisted = MagicMock(return_value=False)
 
         self.assertEquals(
@@ -109,7 +109,7 @@ class URLFinderTestCase(unittest.TestCase):
 
         finder.untiny.extract.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.clean_params.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-        finder.get_final_url.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        finder.follow_redirects.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.is_blacklisted.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
 
 
