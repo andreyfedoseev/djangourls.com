@@ -13,6 +13,8 @@ class UntinyTestCase(unittest.TestCase):
         type(mock_response).text = mock_response_text
 
         with patch("requests.get", MagicMock(return_value=mock_response)) as mock_get:
+            # A request is sent to untiny.me and a set of supported services is
+            # returned
             self.assertEquals(
                 untiny.get_services(),
                 set([".tk", "1u.ro", "1url.com", "2pl.us"])
@@ -21,6 +23,7 @@ class UntinyTestCase(unittest.TestCase):
             self.assertTrue(mock_response_text.called)
 
         with patch("requests.get", MagicMock(side_effect=requests.RequestException)) as mock_get:
+            # If a request to untiny.me fails and empty set should be returned.
             self.assertEquals(untiny.get_services(), set())
             self.assertEquals(mock_get.call_count, 1)
 
@@ -43,6 +46,8 @@ class UntinyTestCase(unittest.TestCase):
 
         with patch("requests.get", MagicMock(return_value=mock_response)) as mock_get:
 
+            # If the URL is tiny send a request to untiny.me to extract
+            # full URL
             untiny.is_tiny.return_value = True
             mock_response_text.return_value = "http://foo.com"
             self.assertEquals(
@@ -55,6 +60,7 @@ class UntinyTestCase(unittest.TestCase):
             mock_get.reset_mock()
             mock_response_text.reset_mock()
 
+            # Check with another URL
             mock_response_text.return_value = "http://bar.com"
             self.assertEquals(
                 untiny.extract("http://1u.ro/123"),
@@ -66,15 +72,16 @@ class UntinyTestCase(unittest.TestCase):
             mock_get.reset_mock()
             mock_response_text.reset_mock()
 
+            # If the URL is not tiny return it unchanged.
             untiny.is_tiny.return_value = False
             self.assertEquals(
                 untiny.extract("http://example.com"),
                 "http://example.com",
             )
-
             self.assertFalse(mock_get.called)
 
         with patch("requests.get", MagicMock(side_effect=requests.RequestException)) as mock_get:
+            # If a request to untiny.me fails return the original URL.
             untiny.is_tiny.return_value = True
             self.assertEquals(
                 untiny.extract("http://1u.ro/123"),
