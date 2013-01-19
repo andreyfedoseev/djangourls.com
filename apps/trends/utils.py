@@ -117,6 +117,28 @@ class URLFinder(object):
         except requests.RequestException:
             return None
 
+    def clean(self, url):
+        """
+        Clean the given URL.
+        """
+        if self.is_blacklisted(url):
+            return None
+
+        # If the URL was untinified we need to start over.
+        extracted = self.untiny.extract(url)
+        if extracted != url:
+            return self.clean(extracted)
+
+        redirects_to = self.follow_redirects(extracted)
+        if not redirects_to:
+            return None
+
+        # If the URL redirects somewhere else we need to start over.
+        if redirects_to != url:
+            return self.clean(redirects_to)
+
+        return self.clean_params(redirects_to)
+
     def find_urls(self, text):
         urls = set()
 

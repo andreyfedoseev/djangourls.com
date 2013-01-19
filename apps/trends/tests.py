@@ -140,6 +140,34 @@ class URLFinderTestCase(unittest.TestCase):
             )
             self.assertEquals(mock_get.call_count, 1)
 
+    def test_clean_url(self):
+
+        finder = URLFinder()
+        finder.is_blacklisted = MagicMock()
+        finder.untiny.extract = MagicMock()
+        finder.follow_redirects = MagicMock()
+        finder.clean_params = MagicMock()
+
+        finder.is_blacklisted.return_value = True
+        self.assertEquals(
+            finder.clean("http://tiny.com"),
+            None
+        )
+        self.assertEquals(finder.is_blacklisted.call_count, 1)
+
+        finder.is_blacklisted.return_value = False
+        finder.untiny.extract.side_effect = lambda url: "http://redirect.com" if url == "http://tiny.com" else url
+        finder.follow_redirects.side_effect = lambda url: "http://final.com" if url == "http://redirect.com" else url
+        finder.clean_params.side_effect = lambda url: "http://cleaned.com" if url == "http://final.com" else url
+        self.assertEquals(
+            finder.clean("http://tiny.com"),
+            "http://cleaned.com",
+        )
+        self.assertEquals(finder.is_blacklisted.call_count, 4)
+        self.assertEquals(finder.untiny.extract.call_count, 3)
+        self.assertEquals(finder.follow_redirects.call_count, 2)
+        self.assertEquals(finder.clean_params.call_count, 1)
+
     def test_find_urls(self):
         finder = URLFinder()
         finder.untiny.extract = MagicMock(side_effect=lambda x: x)
@@ -159,8 +187,6 @@ class URLFinderTestCase(unittest.TestCase):
         finder.clean_params.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.follow_redirects.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.is_blacklisted.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-
-
 
 
 if __name__ == '__main__':
