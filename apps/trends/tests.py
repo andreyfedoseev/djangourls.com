@@ -45,7 +45,6 @@ class UntinyTestCase(unittest.TestCase):
         untiny.is_tiny = MagicMock()
 
         with patch("requests.get", MagicMock(return_value=mock_response)) as mock_get:
-
             # If the URL is tiny send a request to untiny.me to extract
             # full URL
             untiny.is_tiny.return_value = True
@@ -108,31 +107,38 @@ class URLFinderTestCase(unittest.TestCase):
 
     def test_follow_redirects(self):
 
-        def mock_requests_get(url, **kwargs):
-            response = MagicMock()
-            if url == "http://redirects.to":
-                response.url = "http://finalurl.com"
-            else:
-                response.url = url
-            return response
+        finder = URLFinder()
 
-        with patch("requests.get", mock_requests_get):
-            finder = URLFinder()
+        mock_response = MagicMock()
+        mock_response_url = PropertyMock()
+        type(mock_response).url = mock_response_url
+
+        with patch("requests.get", MagicMock(return_value=mock_response)) as mock_get:
+            # A request is sent to the URL. If there was a redirect return the
+            # final URL.
+            mock_response_url.return_value = "http://finalurl.com"
             self.assertEquals(
                 finder.follow_redirects("http://redirects.to"),
                 "http://finalurl.com",
             )
-            self.assertEquals(
-                finder.follow_redirects("http://example.com"),
-                "http://example.com",
-            )
+            self.assertEquals(mock_get.call_count, 1)
+            self.assertEquals(mock_response_url.call_count, 1)
 
-        with patch("requests.get", MagicMock(side_effect=requests.RequestException)):
-            finder = URLFinder()
+            # If there was no redirect return the original URL.
+            self.assertEquals(
+                finder.follow_redirects("http://finalurl.com"),
+                "http://finalurl.com",
+            )
+            self.assertEquals(mock_get.call_count, 2)
+            self.assertEquals(mock_response_url.call_count, 2)
+
+        with patch("requests.get", MagicMock(side_effect=requests.RequestException)) as mock_get:
+            # If request failed return None
             self.assertEquals(
                 finder.follow_redirects("http://redirects.to"),
                 None,
             )
+            self.assertEquals(mock_get.call_count, 1)
 
     def test_find_urls(self):
         finder = URLFinder()
