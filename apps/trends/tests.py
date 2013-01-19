@@ -150,7 +150,7 @@ class URLFinderTestCase(unittest.TestCase):
 
         finder.is_blacklisted.return_value = True
         self.assertEquals(
-            finder.clean("http://tiny.com"),
+            finder.clean_url("http://tiny.com"),
             None
         )
         self.assertEquals(finder.is_blacklisted.call_count, 1)
@@ -160,7 +160,7 @@ class URLFinderTestCase(unittest.TestCase):
         finder.follow_redirects.side_effect = lambda url: "http://final.com" if url == "http://redirect.com" else url
         finder.clean_params.side_effect = lambda url: "http://cleaned.com" if url == "http://final.com" else url
         self.assertEquals(
-            finder.clean("http://tiny.com"),
+            finder.clean_url("http://tiny.com"),
             "http://cleaned.com",
         )
         self.assertEquals(finder.is_blacklisted.call_count, 4)
@@ -170,23 +170,16 @@ class URLFinderTestCase(unittest.TestCase):
 
     def test_find_urls(self):
         finder = URLFinder()
-        finder.untiny.extract = MagicMock(side_effect=lambda x: x)
-        finder.clean_params = MagicMock(side_effect=lambda x: x)
-        finder.follow_redirects = MagicMock(side_effect=lambda x: x)
-        finder.is_blacklisted = MagicMock(return_value=False)
+        finder.clean_url = MagicMock()
+        finder.clean_url.side_effect = lambda url: url if url == "http://good.com" else None
 
         self.assertEquals(
-            finder.find_urls("For http://spam.com bar http://ham.com"),
+            finder.find_urls("For http://good.com bar http://bad.com"),
             set([
-                "http://spam.com",
-                "http://ham.com",
+                "http://good.com",
             ])
         )
-
-        finder.untiny.extract.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-        finder.clean_params.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-        finder.follow_redirects.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-        finder.is_blacklisted.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        self.assertEquals(finder.clean_url.call_count, 2)
 
 
 if __name__ == '__main__':

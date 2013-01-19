@@ -117,17 +117,17 @@ class URLFinder(object):
         except requests.RequestException:
             return None
 
-    def clean(self, url):
+    def clean_url(self, url):
         """
         Clean the given URL.
         """
         if self.is_blacklisted(url):
             return None
 
-        # If the URL was untinified we need to start over.
+        # If the URL was untinyfied we need to start over.
         extracted = self.untiny.extract(url)
         if extracted != url:
-            return self.clean(extracted)
+            return self.clean_url(extracted)
 
         redirects_to = self.follow_redirects(extracted)
         if not redirects_to:
@@ -135,7 +135,7 @@ class URLFinder(object):
 
         # If the URL redirects somewhere else we need to start over.
         if redirects_to != url:
-            return self.clean(redirects_to)
+            return self.clean_url(redirects_to)
 
         return self.clean_params(redirects_to)
 
@@ -143,12 +143,10 @@ class URLFinder(object):
         urls = set()
 
         for url in re.findall(self.URL_RE, text):
-            url = self.untiny.extract(url)
-            url = self.clean_params(url)
-            url = self.follow_redirects(url)
-
-            if not self.is_blacklisted(url):
-                urls.add(url)
+            if url not in urls:
+                cleaned = self.clean_url(url)
+                if cleaned:
+                    urls.add(cleaned)
 
         return urls
 
