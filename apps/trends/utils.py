@@ -1,11 +1,8 @@
-from django.core.cache import cache
+from cache_utils.decorators import cached
 import re
 import urllib
 import urlparse
 import requests
-
-
-_marker = object()
 
 
 URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
@@ -25,60 +22,58 @@ BLACKLIST_URLS = (
 )
 
 
-def get_tiny_url_re():
-    cache_key = "get_tiny_url_re"
-    result = cache.get(cache_key, _marker)
-    if result != _marker:
-        return result
-    try:
-        response = requests.get(
-            "http://untiny.me/api/1.0/services/?format=text"
-        )
-    except requests.RequestException:
-        response = None
+class Untiny(object):
 
-    if response:
-        services = [s.strip() for s in response.text.split(',')]
-        result = re.compile(
-            r'|'.join(r'^http://%s' % service for service in services)
-        )
-    else:
-        result = None
-    cache.set(cache_key, result, 60 * 60 * 24)
-    return result
+    SERVICES_URL = "http://untiny.me/api/1.0/services/"
+    EXTRACT_URL = "http://untiny.me/api/1.0/extract/"
 
-
-def untiny_url(url):
-    cache_key = "untiny_url" + url
-    result = cache.get(cache_key, _marker)
-    if result != _marker:
-        return result
-    try:
-        response = requests.get(
-            "http://untiny.me/api/1.0/extract/?format=text&url={0}".format(
-                urllib.quote(url)
-            )
-        )
-    except requests.RequestException:
-        response = None
-
-    if response:
-        response = response.text
-
+    @cached(60 * 60 * 24)  # Cache for 1 day
+    def get_services(self):
+        """
+        Get a set of tiny URL services from untiny.me.
+        This set consists of domain names.
+        """
         try:
-            if re.match(URL_RE, response) and not url.startswith(response):
-                result = response
-                tiny_urls_re = get_tiny_url_re()
-                if tiny_urls_re and re.match(tiny_urls_re, result):
-                    result = untiny_url(result)
-            else:
-                result = None
-        except UnicodeDecodeError:
-            result = None
-    else:
-        result = None
-    cache.set(cache_key, result, 60 * 60 * 24)
-    return result
+            response = requests.get(
+                Untiny.SERVICES_URL,
+                params=dict(format="text")
+            )
+        except requests.RequestException:
+            return set()
+
+        return set([s.strip() for s in response.text.split(',')])
+
+    def is_tiny(self, url):
+        """
+        Check if the provided URL is tiny.
+        """
+        return urlparse.urlsplit(url).netloc in self.get_services()
+
+    @cached(60 * 60 * 24)  # Cache for 1 day
+    def extract(self, url):
+        """
+        Return an untinied version of the given URL.
+        If the URL is not tiny it's returned unchanged.
+        The method is called recursively to extract URLs 'tinyfied' multiple
+        times.
+        """
+        if not self.is_tiny(url):
+            return url
+        try:
+            response = requests.get(
+                Untiny.EXTRACT_URL,
+                params=dict(
+                    format="text",
+                    url=url,
+                )
+            )
+        except requests.RequestException:
+            return url
+
+        return self.extract(response.text)
+
+
+untiny = Untiny()
 
 
 def clean_url(url):
@@ -111,14 +106,8 @@ def clean_url(url):
 def find_urls(text):
     urls = set()
 
-    tiny_urls_re = get_tiny_url_re()
-
     for url in re.findall(URL_RE, text):
-        if tiny_urls_re and re.match(tiny_urls_re, url):
-            url = untiny_url(url)
-        if not url:
-            continue
-
+        url = untiny.extract(url)
         url = clean_url(url)
         try:
             url = requests.get(url).url
