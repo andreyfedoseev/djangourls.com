@@ -74,15 +74,15 @@ class URLFinderTestCase(unittest.TestCase):
 
         url = "http://www.slideshare.net/mpirnat/web-development-with-python-and-django?utm_source=Python+Weekly+Newsletter&utm_campaign=7fc9a4c2e2-Python_Weekly_Issue_70_January_17_2013&utm_medium=email"
         reference = "http://www.slideshare.net/mpirnat/web-development-with-python-and-django"
-        self.assertEquals(finder.clean_url(url), reference)
+        self.assertEquals(finder.clean_params(url), reference)
 
         url = "http://www.youtube.com/watch?v=DDjpOrlfh0Y"
         reference = url
-        self.assertEquals(finder.clean_url(url), reference)
+        self.assertEquals(finder.clean_params(url), reference)
 
         url = "http://www.youtube.com/watch?v=DDjpOrlfh0Y&utm_medium=email"
         reference = "http://www.youtube.com/watch?v=DDjpOrlfh0Y"
-        self.assertEquals(finder.clean_url(url), reference)
+        self.assertEquals(finder.clean_params(url), reference)
 
     def test_is_blacklisted(self):
         finder = URLFinder()
@@ -95,7 +95,7 @@ class URLFinderTestCase(unittest.TestCase):
     def test_find_urls(self):
         finder = URLFinder()
         finder.untiny.extract = MagicMock(side_effect=lambda x: x)
-        finder.clean_url = MagicMock(side_effect=lambda x: x)
+        finder.clean_params = MagicMock(side_effect=lambda x: x)
         finder.get_final_url = MagicMock(side_effect=lambda x: x)
         finder.is_blacklisted = MagicMock(return_value=False)
 
@@ -108,7 +108,7 @@ class URLFinderTestCase(unittest.TestCase):
         )
 
         finder.untiny.extract.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
-        finder.clean_url.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        finder.clean_params.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.get_final_url.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
         finder.is_blacklisted.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
 

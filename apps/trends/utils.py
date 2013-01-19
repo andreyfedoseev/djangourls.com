@@ -79,7 +79,7 @@ class URLFinder(object):
     def __init__(self):
         self.untiny = Untiny()
 
-    def clean_url(self, url):
+    def clean_params(self, url):
         """
         Remove superfluous parameters from query string. At the moment all
         parameters starting with `utm_` are removed.
@@ -124,7 +124,7 @@ class URLFinder(object):
 
         for url in re.findall(self.URL_RE, text):
             url = self.untiny.extract(url)
-            url = self.clean_url(url)
+            url = self.clean_params(url)
             url = self.get_final_url(url)
 
             if not self.is_blacklisted(url):
