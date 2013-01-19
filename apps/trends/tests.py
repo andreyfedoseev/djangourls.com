@@ -1,5 +1,5 @@
-from mock import MagicMock, patch
-from trends.utils import Untiny
+from mock import MagicMock, patch, call
+from trends.utils import Untiny, URLFinder
 import requests
 import unittest
 
@@ -67,22 +67,52 @@ class UntinyTestCase(unittest.TestCase):
             )
 
 
-class UtilsTestCase(unittest.TestCase):
+class URLFinderTestCase(unittest.TestCase):
 
     def test_clean_url(self):
-        from trends.utils import clean_url
+        finder = URLFinder()
 
         url = "http://www.slideshare.net/mpirnat/web-development-with-python-and-django?utm_source=Python+Weekly+Newsletter&utm_campaign=7fc9a4c2e2-Python_Weekly_Issue_70_January_17_2013&utm_medium=email"
         reference = "http://www.slideshare.net/mpirnat/web-development-with-python-and-django"
-        self.assertEquals(clean_url(url), reference)
+        self.assertEquals(finder.clean_url(url), reference)
 
         url = "http://www.youtube.com/watch?v=DDjpOrlfh0Y"
         reference = url
-        self.assertEquals(clean_url(url), reference)
+        self.assertEquals(finder.clean_url(url), reference)
 
         url = "http://www.youtube.com/watch?v=DDjpOrlfh0Y&utm_medium=email"
         reference = "http://www.youtube.com/watch?v=DDjpOrlfh0Y"
-        self.assertEquals(clean_url(url), reference)
+        self.assertEquals(finder.clean_url(url), reference)
+
+    def test_is_blacklisted(self):
+        finder = URLFinder()
+        self.assertTrue(finder.is_blacklisted("http://instagr.am/12345"))
+        self.assertFalse(finder.is_blacklisted("http://example.com"))
+
+    def test_get_final_url(self):
+        pass
+
+    def test_find_urls(self):
+        finder = URLFinder()
+        finder.untiny.extract = MagicMock(side_effect=lambda x: x)
+        finder.clean_url = MagicMock(side_effect=lambda x: x)
+        finder.get_final_url = MagicMock(side_effect=lambda x: x)
+        finder.is_blacklisted = MagicMock(return_value=False)
+
+        self.assertEquals(
+            finder.find_urls("For http://spam.com bar http://ham.com"),
+            set([
+                "http://spam.com",
+                "http://ham.com",
+            ])
+        )
+
+        finder.untiny.extract.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        finder.clean_url.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        finder.get_final_url.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+        finder.is_blacklisted.assert_has_calls([call("http://spam.com"), call("http://ham.com")])
+
+
 
 
 if __name__ == '__main__':

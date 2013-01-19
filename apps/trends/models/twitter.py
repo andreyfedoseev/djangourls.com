@@ -1,7 +1,6 @@
 from django.db import models
 from trends.models.trend import Mention, TrendItem
-from trends.utils import find_urls
-
+from trends.utils import url_finder
 import json
 import urllib
 import requests
@@ -48,7 +47,7 @@ class TwitterSearch(models.Model):
                 text = item['text']
                 tweet_id = item['id']
 
-                for url in find_urls(text):
+                for url in url_finder.find_urls(text):
                     # This twitter mention was fetched already, skip this URL
                     if TwitterMention.objects.filter(
                         trend__url=url,

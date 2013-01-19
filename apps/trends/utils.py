@@ -5,23 +5,6 @@ import urlparse
 import requests
 
 
-URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
-BLACKLIST_URLS = (
-    re.compile("^http://instagr\.am/"),
-    re.compile("^http://instagram\.com/"),
-    re.compile("^http://yfrog.com/"),
-    re.compile("^http[s]?://foursquare\.com/"),
-    re.compile("^http[s]?://(www|m)\.facebook\.com/"),
-    re.compile("^http[s]?://twitter\.com/\w+/status/"),
-    re.compile("^http://(m\.)?tmi\.me/"),
-    re.compile("^http://imgur\.com/"),
-    re.compile("^http://twitter\.yfrog\.com/"),
-    re.compile("^http://twitpic\.com/"),
-    re.compile("^http://pics\.lockerz\.com/"),
-    re.compile("^http://adf\.ly/"),
-)
-
-
 class Untiny(object):
 
     SERVICES_URL = "http://untiny.me/api/1.0/services/"
@@ -73,55 +56,81 @@ class Untiny(object):
         return self.extract(response.text)
 
 
-untiny = Untiny()
+class URLFinder(object):
 
+    URL_RE = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.IGNORECASE)
+    BLACKLIST_DOMAINS = set([
+        "instagr.am",
+        "instagram.com",
+        "yfrog.com",
+        "foursquare.com",
+        "www.facebook.com",
+        "m.facebook.com",
+        "twitter.com",
+        "tmi.me",
+        "m.tmi.me",
+        "imgur.com",
+        "twitter.yfrog.com",
+        "twitpic.com",
+        "pics.lockerz.com",
+        "adf.ly",
+    ])
 
-def clean_url(url):
-    """
-    Remove superfluous parameters from query string. At the moment all
-    parameters starting with `utm_` are removed.
-    :param url: URL to be cleaned
-    :return: cleaned URL
-    """
-    try:
-        str(url)
-    except UnicodeEncodeError:
-        url = urllib.quote(url.encode('utf-8'))
-    parts = list(urlparse.urlsplit(url))
-    if not parts[3]:
-        return url
-    query = urlparse.parse_qsl(parts[3])
-    query = [
-        (param, value)
-        for param, value in query
-        if not param.startswith("utm_")
-    ]
-    if query:
-        parts[3] = urllib.urlencode(query)
-    else:
-        parts[3] = ''
-    return urlparse.urlunsplit(parts)
+    def __init__(self):
+        self.untiny = Untiny()
 
-
-def find_urls(text):
-    urls = set()
-
-    for url in re.findall(URL_RE, text):
-        url = untiny.extract(url)
-        url = clean_url(url)
+    def clean_url(self, url):
+        """
+        Remove superfluous parameters from query string. At the moment all
+        parameters starting with `utm_` are removed.
+        """
         try:
-            url = requests.get(url).url
+            str(url)
+        except UnicodeEncodeError:
+            url = urllib.quote(url.encode('utf-8'))
+        parts = list(urlparse.urlsplit(url))
+        if not parts[3]:
+            return url
+        query = urlparse.parse_qsl(parts[3])
+        query = [
+            (param, value)
+            for param, value in query
+            if not param.startswith("utm_")
+        ]
+        if query:
+            parts[3] = urllib.urlencode(query)
+        else:
+            parts[3] = ''
+        return urlparse.urlunsplit(parts)
+
+    def is_blacklisted(self, url):
+        """
+        Check if the provided URL should be blacklisted.
+        """
+        return urlparse.urlsplit(url).netloc in URLFinder.BLACKLIST_DOMAINS
+
+    def get_final_url(self, url):
+        """
+        Follow all redirects from given URL. Return None if the final URL
+        can't be accessed.
+        """
+        try:
+            return requests.get(url).url
         except requests.RequestException:
-            continue
+            return None
 
-        blacklisted = False
-        for blacklist_re in BLACKLIST_URLS:
-            if blacklist_re.match(url):
-                blacklisted = True
-                break
+    def find_urls(self, text):
+        urls = set()
 
-        if not blacklisted:
-            urls.add(url)
+        for url in re.findall(self.URL_RE, text):
+            url = self.untiny.extract(url)
+            url = self.clean_url(url)
+            url = self.get_final_url(url)
 
-    return urls
+            if not self.is_blacklisted(url):
+                urls.add(url)
 
+        return urls
+
+
+url_finder = URLFinder()
