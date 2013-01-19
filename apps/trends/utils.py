@@ -37,8 +37,6 @@ class Untiny(object):
         """
         Return an untinied version of the given URL.
         If the URL is not tiny it's returned unchanged.
-        The method is called recursively to extract URLs 'tinyfied' multiple
-        times.
         """
         if not self.is_tiny(url):
             return url
@@ -53,7 +51,7 @@ class Untiny(object):
         except requests.RequestException:
             return url
 
-        return self.extract(response.text)
+        return response.text
 
 
 class URLFinder(object):

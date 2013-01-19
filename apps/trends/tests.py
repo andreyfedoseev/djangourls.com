@@ -54,7 +54,7 @@ class UntinyTestCase(unittest.TestCase):
         )
         self.assertEquals(
             untiny.extract("http://1u.ro/123"),
-            "http://example.com?extracted=true",
+            "http://2pl.us/234",
         )
         self.assertEquals(
             untiny.extract("http://example.com"),
