@@ -33,13 +33,7 @@ class Untiny(object):
         return urlparse.urlsplit(url).netloc in self.get_services()
 
     @cached(60 * 60 * 24)  # Cache for 1 day
-    def extract(self, url):
-        """
-        Return an untinied version of the given URL.
-        If the URL is not tiny it's returned unchanged.
-        """
-        if not self.is_tiny(url):
-            return url
+    def _do_extract(self, url):
         try:
             response = requests.get(
                 Untiny.EXTRACT_URL,
@@ -50,8 +44,16 @@ class Untiny(object):
             )
         except requests.RequestException:
             return url
-
         return response.text
+
+    def extract(self, url):
+        """
+        Return an untinied version of the given URL.
+        If the URL is not tiny it's returned unchanged.
+        """
+        if not self.is_tiny(url):
+            return url
+        return self._do_extract(url)
 
 
 class URLFinder(object):
