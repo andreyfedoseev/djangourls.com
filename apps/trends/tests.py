@@ -89,8 +89,33 @@ class URLFinderTestCase(unittest.TestCase):
         self.assertTrue(finder.is_blacklisted("http://instagr.am/12345"))
         self.assertFalse(finder.is_blacklisted("http://example.com"))
 
-    def test_get_final_url(self):
-        pass
+    def test_follow_redirects(self):
+
+        def mock_requests_get(url, **kwargs):
+            response = MagicMock()
+            if url == "http://redirects.to":
+                response.url = "http://finalurl.com"
+            else:
+                response.url = url
+            return response
+
+        with patch("requests.get", mock_requests_get):
+            finder = URLFinder()
+            self.assertEquals(
+                finder.follow_redirects("http://redirects.to"),
+                "http://finalurl.com",
+            )
+            self.assertEquals(
+                finder.follow_redirects("http://example.com"),
+                "http://example.com",
+            )
+
+        with patch("requests.get", MagicMock(side_effect=requests.RequestException)):
+            finder = URLFinder()
+            self.assertEquals(
+                finder.follow_redirects("http://redirects.to"),
+                None,
+            )
 
     def test_find_urls(self):
         finder = URLFinder()
