@@ -76,6 +76,8 @@ class URLFinder(object):
         "twitpic.com",
         "pics.lockerz.com",
         "adf.ly",
+        "businesstipsinfo.com",
+        "marketingwebsitereview.info",
     ])
 
     def __init__(self):
