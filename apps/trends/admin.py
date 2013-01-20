@@ -1,7 +1,7 @@
 from django.contrib import admin
 from trends.models import TwitterSearch, TrendItem
 from django.contrib.admin.options import ModelAdmin
-from trends.models.trend import BlacklistWord
+from trends.models.trend import BlacklistWord, WhitelistWord
 
 
 def link(obj):
@@ -36,3 +36,4 @@ admin.site.register(TwitterSearch, TwitterSearchAdmin)
 
 
 admin.site.register(BlacklistWord, ModelAdmin)
+admin.site.register(WhitelistWord, ModelAdmin)
