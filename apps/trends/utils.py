@@ -86,10 +86,6 @@ class URLFinder(object):
         Remove superfluous parameters from query string. At the moment all
         parameters starting with `utm_` are removed.
         """
-        try:
-            str(url)
-        except UnicodeEncodeError:
-            url = urllib.quote(url.encode('utf-8'))
         parts = list(urlparse.urlsplit(url))
         if not parts[3]:
             return url
