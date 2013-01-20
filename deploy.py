@@ -63,6 +63,14 @@ def buildout():
 
 
 @task
+def migrate():
+    config = get_config()
+    with settings(user="django"):
+        with settings(cwd=config["project_path"]):
+            run("./bin/django migrate")
+
+
+@task
 def collectstatic():
     config = get_config()
     with settings(user="django"):
@@ -90,6 +98,7 @@ def restart_supervisor():
 def full():
     pull()
     buildout()
+    migrate()
     collectstatic()
     restart_supervisor()
 #    restart_supervisor_celery()
