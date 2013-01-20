@@ -4,9 +4,14 @@ from django.contrib.admin.options import ModelAdmin
 from trends.models.trend import BlacklistWord
 
 
+def link(obj):
+    return u"""<a href="{url}" target="_blank">{url}</a>""".format(url=obj.url)
+link.allow_tags = True
+
+
 class TrendItemAdmin(ModelAdmin):
 
-    list_display = ["title", "url", "displayed"]
+    list_display = ["title", link, "displayed"]
     list_filter = ["displayed"]
     actions = ["make_not_displayed", "re_fetch"]
 
