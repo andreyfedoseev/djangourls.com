@@ -85,7 +85,7 @@ class UntinyTestCase(unittest.TestCase):
 
 class URLFinderTestCase(unittest.TestCase):
 
-    def test_clean_url(self):
+    def test_clean_params(self):
         finder = URLFinder()
 
         url = "http://www.slideshare.net/mpirnat/web-development-with-python-and-django?utm_source=Python+Weekly+Newsletter&utm_campaign=7fc9a4c2e2-Python_Weekly_Issue_70_January_17_2013&utm_medium=email"
@@ -98,6 +98,10 @@ class URLFinderTestCase(unittest.TestCase):
 
         url = "http://www.youtube.com/watch?v=DDjpOrlfh0Y&utm_medium=email"
         reference = "http://www.youtube.com/watch?v=DDjpOrlfh0Y"
+        self.assertEquals(finder.clean_params(url), reference)
+
+        url = "http://baunerreon.com.br/compartilhar.php?url=http://cinema.uol.com.br/ultnot/reuters/2013/01/19/bonecos-de-django-livre-sao-considerados-ofensivos-por-afro-americanos.jhtm+&titulo=Bonecos+de+%22Django+Livre%22+s%C3%83%C2%83%C3%82%C2%A3o+considerados+ofensivos+por+afro-americanos&utm_medium=twitter+@revhomemmoderno&utm_source=Not%C3%83%C2%ADcias+Cinema"
+        reference = "http://baunerreon.com.br/compartilhar.php?url=http%3A%2F%2Fcinema.uol.com.br%2Fultnot%2Freuters%2F2013%2F01%2F19%2Fbonecos-de-django-livre-sao-considerados-ofensivos-por-afro-americanos.jhtm+&titulo=Bonecos+de+%22Django+Livre%22+s%C3%83%C2%83%C3%82%C2%A3o+considerados+ofensivos+por+afro-americanos"
         self.assertEquals(finder.clean_params(url), reference)
 
     def test_is_blacklisted(self):
