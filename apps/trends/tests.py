@@ -104,6 +104,10 @@ class URLFinderTestCase(unittest.TestCase):
         reference = "http://baunerreon.com.br/compartilhar.php?url=http%3A%2F%2Fcinema.uol.com.br%2Fultnot%2Freuters%2F2013%2F01%2F19%2Fbonecos-de-django-livre-sao-considerados-ofensivos-por-afro-americanos.jhtm+&titulo=Bonecos+de+%22Django+Livre%22+s%C3%83%C2%83%C3%82%C2%A3o+considerados+ofensivos+por+afro-americanos"
         self.assertEquals(finder.clean_params(url), reference)
 
+        url = "http://www.brankovukelic.com/2013/01/two-scoops-of-django-book-review.html?spref=tw"
+        reference = "http://www.brankovukelic.com/2013/01/two-scoops-of-django-book-review.html"
+        self.assertEquals(finder.clean_params(url), reference)
+
     def test_is_blacklisted(self):
         finder = URLFinder()
         self.assertTrue(finder.is_blacklisted("http://instagr.am/12345"))

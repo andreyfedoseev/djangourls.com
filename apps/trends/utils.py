@@ -83,20 +83,25 @@ class URLFinder(object):
     def __init__(self):
         self.untiny = Untiny()
 
+    def _is_param_allowed(self, param, value):
+        """
+        Check the query string parameter is allowed or should be removed.
+        """
+        if param.startswith("utm_"):
+            return False
+        if param == "spref" and value == "tw":
+            return False
+        return True
+
     def clean_params(self, url):
         """
-        Remove superfluous parameters from query string. At the moment all
-        parameters starting with `utm_` are removed.
+        Remove superfluous parameters from query string.
         """
         parts = list(urlparse.urlsplit(url))
         if not parts[3]:
             return url
         query = urlparse.parse_qsl(parts[3])
-        query = [
-            (param, value)
-            for param, value in query
-            if not param.startswith("utm_")
-        ]
+        query = [q for q in query if self._is_param_allowed(*q)]
         if query:
             parts[3] = urllib.urlencode(query)
         else:
