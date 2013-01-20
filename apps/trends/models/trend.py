@@ -69,19 +69,22 @@ class TrendItem(URL):
             item.title = response.get("title", item.title) or item.title
             item.description = response.get("summary", u"")
 
-            text = u" ".join((item.title, item.description))
-            text_lower = text.lower()
+            full_text = u" ".join((
+                response.get("title", u""),
+                response.get("text", u""),
+            ))
+            full_text_lower = full_text.lower()
             blacklisted = False
 
             for word in blacklist_words:
-                if word in text_lower:
+                if word in full_text_lower:
                     blacklisted = True
 
             if blacklisted:
                 item.save()
                 continue
 
-            if not guessLanguage(text).startswith("en"):
+            if not guessLanguage(full_text).startswith("en"):
                 item.save()
                 continue
 
