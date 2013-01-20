@@ -50,6 +50,9 @@ class TrendItem(URL):
         blacklist_words = [
             w.lower() for w in BlacklistWord.objects.values_list("word", flat=True)
         ]
+        whitelist_words = [
+            w.lower() for w in WhitelistWord.objects.values_list("word", flat=True)
+        ]
 
         for item in queryset:
             cnt += 1
@@ -74,13 +77,22 @@ class TrendItem(URL):
                 response.get("text", u""),
             ))
             full_text_lower = full_text.lower()
+
             blacklisted = False
+            whitelisted = False
 
             for word in blacklist_words:
                 if word in full_text_lower:
                     blacklisted = True
+                    break
 
-            if blacklisted:
+            if not blacklisted and whitelist_words:
+                for word in whitelist_words:
+                    if word in full_text_lower:
+                        whitelisted = True
+                        break
+
+            if blacklisted or not whitelisted:
                 item.save()
                 continue
 
@@ -105,6 +117,17 @@ class Mention(models.Model):
 
 
 class BlacklistWord(models.Model):
+
+    word = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return self.word
+
+    class Meta:
+        app_label = "trends"
+
+
+class WhitelistWord(models.Model):
 
     word = models.CharField(max_length=100)
 
