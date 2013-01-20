@@ -97,6 +97,8 @@ class URLFinder(object):
         """
         Remove superfluous parameters from query string.
         """
+        if isinstance(url, unicode):
+            url = url.encode("utf-8")
         parts = list(urlparse.urlsplit(url))
         if not parts[3]:
             return url
@@ -106,7 +108,7 @@ class URLFinder(object):
             parts[3] = urllib.urlencode(query)
         else:
             parts[3] = ''
-        return urlparse.urlunsplit(parts)
+        return urlparse.urlunsplit(parts).decode("utf-8")
 
     def is_blacklisted(self, url):
         """
