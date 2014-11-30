@@ -1,16 +1,19 @@
+from getenv import env
+import dj_database_url
 import os
-from django.conf.global_settings import LOGGING
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'project.db'
-    }
+    "default": dj_database_url.config(default="sqlite:///project.db"),
 }
 
+DEBUG = env("DEBUG", False)
+TEMPLATE_DEBUG = DEBUG
 
-TIME_ZONE = 'America/Chicago'
+# Don't share this with anybody.
+SECRET_KEY = ''
+
+TIME_ZONE = env("TIME_ZONE", "America/Chicago")
 
 LANGUAGE_CODE = 'en-us'
 
@@ -34,43 +37,40 @@ STATICFILES_FINDERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.middleware.locale.LocaleMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
 )
 
-ROOT_URLCONF = 'project.urls'
-
+ROOT_URLCONF = "project.urls"
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.humanize',
-    'django.contrib.markup',
-    'django.contrib.sessions',
-    'django.contrib.sites',
-    'django.contrib.syndication',
-    'django.contrib.staticfiles',
-    'django_extensions',
-    'gunicorn',
-    'south',
-    'compressor',
-    'robots',
-    'debug_toolbar',
-    'feeds',
-    'trends',
-    'packages',
-    'books',
-    'project',
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.humanize",
+    "django.contrib.markup",
+    "django.contrib.sessions",
+    "django.contrib.sites",
+    "django.contrib.syndication",
+    "django.contrib.staticfiles",
+    "django_extensions",
+    "gunicorn",
+    "south",
+    "compressor",
+    "robots",
+    "feeds",
+    "trends",
+    "packages",
+    "books",
+    "project",
 )
 
 TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
 )
 
 TEMPLATE_DIRS = (
@@ -89,20 +89,16 @@ TEMPLATE_CONTEXT_PROCESSORS = (
 SITE_ID = 1
 
 CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211',
+    "default": {
+        "BACKEND": "django.core.cache.backends.memcached.MemcachedCache",
+        "LOCATION": "127.0.0.1:11211",
     }
 }
 KEY_PREFIX = "djangourls"
 
-LOGGING["handlers"]["console"] = {
-    'level': 'DEBUG',
-    'class': 'logging.StreamHandler',
-}
+DEBUG_TOOLBAR_PATCH_SETTINGS = env("ENABLE_DEBUG_TOOLBAR", False)
 
-LOGGING["loggers"]["djangourls.harvest"] = {
-    'handlers': ['mail_admins'],
-    'level': 'ERROR',
-    'propagate': True,
-}
+DIFFBOT_TOKEN = env("DIFFBOT_TOKEN", "")
+
+AMAZON_ACCESS_KEY = env("AMAZON_ACCESS_KEY", "")
+AMAZON_SECRET_KEY = env("AMAZON_SECRET_KEY", "")
