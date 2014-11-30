@@ -10,3 +10,6 @@ project/media/admin/
 project/media/debug_toolbar/
 /.idea/
 .env
+project/static/CACHE
+project/static/admin
+project/static/django_extensions

@@ -27,8 +27,11 @@ MEDIA_ROOT = os.path.join(os.path.dirname(__file__), 'media')
 MEDIA_URL = '/media/'
 
 # Static file configuration
-STATIC_ROOT = os.path.join(os.path.dirname(__file__), "..", "static")
+STATIC_ROOT = os.path.join(os.path.dirname(__file__), "static")
 STATIC_URL = "/static/"
+
+COMPRESS_ROOT = STATIC_ROOT
+COMPRESS_URL = STATIC_URL
 
 STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
@@ -65,7 +68,6 @@ INSTALLED_APPS = (
     "trends",
     "packages",
     "books",
-    "project",
 )
 
 TEMPLATE_LOADERS = (
